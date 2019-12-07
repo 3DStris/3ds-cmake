@@ -306,7 +306,7 @@ function(add_3dsx_target target)
 		file(GLOB_RECURSE ROMFS_FILES "${APP_ROMFS}/*.*")
 
 		if(NOT ${target_we}.smdh)
-			__add_smdh(${target_we} ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
+			__add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 		endif()
 
 		add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.3dsx
@@ -371,7 +371,7 @@ function(add_cia_target target RSF IMAGE SOUND ROMFS)
 	endif()
 	file(GLOB_RECURSE ROMFS_FILES "${ROMFS}/*.*")
 	if(NOT ${target_we}.smdh)
-		__add_smdh(${target_we} ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
+		__add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 	endif()
 	__add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
 	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cia
