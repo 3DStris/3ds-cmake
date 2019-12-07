@@ -1,6 +1,6 @@
-# 3ds-cmake
+# 3ds-cmake (3DSTris)
 
-CMake scripts for devkitArm and 3DS and GBA homebrew development.
+CMake scripts for devkitArm and 3DS homebrew development.
 
 It aims to provide at least the same functionalities as the devkitPro makefiles. It can help to build more complex projects or simply compile libraries by using the toolchain file.
 
@@ -10,7 +10,6 @@ It aims to provide at least the same functionalities as the devkitPro makefiles.
 
 - [How to use it?](#how-to-use-it)
   * [For 3DS projects](#for-3ds-projects)
-  * [For GBA projects](#for-gba-projects)
   * [General](#general)
 - [3DS CMake files](#3ds-cmake-files)
   * [The toolchain file (DevkitArm3DS.cmake)](#the-toolchain-file-devkitarm3dscmake)
@@ -41,18 +40,6 @@ It aims to provide at least the same functionalities as the devkitPro makefiles.
     + [add_shbin_library(target input1 [input2 ...])](#add_shbin_librarytarget-input1-input2-)
     + [target_embed_shader(target input1 [input2 ...])](#target_embed_shadertarget-input1-input2-)
   * [Example of CMakeLists.txt using ctrulib and shaders](#example-of-cmakeliststxt-using-ctrulib-and-shaders)
-- [GBA CMake files](#gba-cmake-files)
-  * [The toolchain file (DevkitArmGBA.cmake)](#the-toolchain-file-devkitarmgbacmake)
-    + [GBA](#gba)
-    + [DKA_SUGGESTED_C_FLAGS](#dka_suggested_c_flags-1)
-    + [DKA_SUGGESTED_CXX_FLAGS](#dka_suggested_cxx_flags-1)
-    + [WITH_PORTLIBS](#with_portlibs-1)
-  * [ToolsGBA.cmake](#toolsgbacmake)
-    + [add_gba_executable( elf_executable )](#add_gba_executable-elf_executable-)
-    + [add_binary_library(target input1 [input2 ...])](#add_binary_librarytarget-input1-input2--1)
-    + [target_embed_file(target input1 [input2 ...])](#target_embed_filetarget-input1-input2--1)
-    + [target_maxmod_file( elf_executable sound_files )](#target_maxmod_file-elf_executable-sound_files-)
-  * [Example of CMakeLists.txt using assembler files, images and sounds](#example-of-cmakeliststxt-using-assembler-files-images-and-sounds)
 
 <!-- tocstop -->
 
@@ -70,20 +57,6 @@ Or, put the following at the top of your `CMakeLists.txt` file:
 
 ```cmake
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/DevkitArm3DS.cmake)
-```
-
-### For GBA projects
-
-Simply copy `DevkitArmGBA.cmake` and the `cmake` folder at the root of your project (where your CMakeLists.txt is). Then start cmake with
-
-```sh
-cmake -DCMAKE_TOOLCHAIN_FILE=DevkitArmGBA.cmake
-```
-
-Or, put the following at the top of your `CMakeLists.txt` file:
-
-```cmake
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/DevkitArmGBA.cmake)
 ```
 
 ### General
@@ -610,111 +583,4 @@ add_executable(hello_cmake ${SOURCE_FILES})
 target_link_libraries(hello_cmake shaders 3ds::ctrulib)
 
 add_3dsx_target(hello_cmake)
-```
-
-## GBA CMake files
-
-### The toolchain file (DevkitArmGBA.cmake)
-
-#### GBA
-
-This CMake variable will be set so that you can test against it for projects that can be built on other platforms.
-
-#### DKA_SUGGESTED_C_FLAGS
-
-This CMake variable is set to `-fomit-frame-pointer -ffast-math`. Those are the recommended C flags for devkitArm projects but are non-mandatory.
-
-#### DKA_SUGGESTED_CXX_FLAGS
-
-This CMake variable is set to `-fomit-frame-pointer -ffast-math -fno-rtti -fno-exceptions`. Those are the recommended C++ flags for devkitArm projects but are non-mandatory.
-
-#### WITH_PORTLIBS
-
-By default the portlibs folder will be used, it can be disabled by changing the value of WITH_PORTLIBS to OFF from the cache (or forcing the value from your CMakeLists.txt).
-
-### ToolsGBA.cmake
-
-This file must be included with `include(ToolsGBA)`. It provides several macros related to GBA development.
-
-#### add_gba_executable( elf_executable )
-
-Will generate a .gba file from the elf_executable.
-
-#### add_binary_library(target input1 [input2 ...])
-
-**/!\ Requires ASM to be enabled ( `enable_language(ASM)` or
-`project(yourprojectname C CXX ASM)`)**
-
-Converts the files given as input to arrays of their binary data. This is useful to embed resources into your project. For example, logo.bmp will generate the array `u8 logo_bmp[]` and its size `logo_bmp_size`. By linking this library, you will also have access to a generated header file called `logo_bmp.h` which contains the declarations you need to use it.
-
-Note : All dots in the filename are converted to `_`, and if it starts with a number, `_` will be prepended. For example `8x8.gas.tex` would give the name `_8x8_gas_tex`.
-
-#### target_embed_file(target input1 [input2 ...])
-
-This is the same as:
-
-```cmake
-add_binary_library(tempbinlib input1 [input2 ...])
-target_link_libraries(target tempbinlib)
-```
-
-#### target_maxmod_file( elf_executable sound_files )
-
-Will generate a soundbank file for the MaxMOD music player from sound_files and add it to elf_executable.
-
-### Example of CMakeLists.txt using assembler files, images and sounds
-
-```cmake
-cmake_minimum_required(VERSION 3.1.0)
-
-# Note that you must copy the cmake folder and the DevkitArmGBA.cmake file in this directory
-set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_LIST_DIR}/DevkitArmGBA.cmake)
-# Add the cmake folder to the modules paths, so that we can use the tools
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-# ASM must be enabled to support .S files
-enable_language(ASM)
-# Include all the macros and tools needed for GBA development.
-include(ToolsGBA)
-
-project(hello_world)
-
-# List all the source files in our directory
-LIST(APPEND SOURCE_FILES
-	./main.cpp
-	./memcpy.s
-)
-# List all the data files to be included
-LIST(APPEND EXTRA_DATA_FILES
-	./data/dkp_logo.c
-)
-# List all libGBA directories
-LIST(APPEND INCLUDE_DIRECTORIES
-	${DEVKITPRO}/libgba/include
-	${DEVKITARM}/arm-none-eabi/include/
-)
-# List all library directories
-LIST(APPEND TARGET_LIBRARIES
-	${DEVKITPRO}/libgba/lib
-)
-
-link_directories(${TARGET_LIBRARIES})
-include_directories(${INCLUDE_DIRECTORIES})
-# Create elf file
-add_executable(hello_world.elf ${SOURCE_FILES} ${INCLUDE_FILES} ${EXTRA_DATA_FILES})
-# Generate the .gba from the elf
-add_gba_executable(hello_world.elf)
-# Link the application, libgba and maxmod
-target_link_libraries(hello_world.elf gba mm)
-
-# List all the MaxMOD music files
-file(GLOB_RECURSE MUSIC_FILES
-	./music/*
-)
-# Build soundbank file from music files
-target_maxmod_file(hello_world.elf ${MUSIC_FILES})
-
-# List all the binary data files to be included
-file(GLOB_RECURSE DATA_FILES
-	./data/*.bin
-)
 ```
