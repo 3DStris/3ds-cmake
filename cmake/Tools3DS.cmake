@@ -305,7 +305,7 @@ function(add_3dsx_target target)
 
 		file(GLOB_RECURSE ROMFS_FILES "${APP_ROMFS}/*.*")
 
-		if(NOT TARGET ${target_we}_smdh)
+		if(NOT ${target_we}.smdh)
 			__add_smdh(${target_we} ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 		endif()
 
@@ -370,7 +370,7 @@ function(add_cia_target target RSF IMAGE SOUND ROMFS)
 		endif()
 	endif()
 	file(GLOB_RECURSE ROMFS_FILES "${ROMFS}/*.*")
-	if(NOT TARGET ${target_we}_smdh)
+	if(NOT ${target_we}.smdh)
 		__add_smdh(${target_we} ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 	endif()
 	__add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
