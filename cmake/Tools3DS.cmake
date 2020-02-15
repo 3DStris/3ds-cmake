@@ -303,7 +303,7 @@ function(add_3dsx_target target)
 		set(APP_ROMFS ${ARGV4})
 		set(APP_ICON ${ARGV5})
 
-		file(GLOB_RECURSE ROMFS_FILES "${APP_ROMFS}/*.*")
+		file(GLOB_RECURSE ROMFS_FILES CONFIGURE_DEPENDS "${APP_ROMFS}/*.*")
 
 		if(NOT ${target_we}.smdh)
 			__add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
