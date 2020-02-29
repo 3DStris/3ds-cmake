@@ -5,7 +5,7 @@
 #  Citro2D_INCLUDE_DIRS - The Citro2D include directories
 #  Citro2D_LIBRARIES - The libraries needed to use Citro2D
 # Unless we are unable to find ctrulib
-# It also adds an imported target named `3ds::Citro2D`, Linking against it is
+# It also adds an imported target named `3ds::citro2d`, Linking against it is
 # equivalent to:
 # target_link_libraries(mytarget ${Citro2D_LIBRARIES})
 # target_include_directories(mytarget PRIVATE ${Citro2D_INCLUDE_DIRS})
@@ -59,4 +59,4 @@ set(Citro2D_PROCESS_LIBS Citro2D_LIBRARY LIBM_LIBRARY)
 
 libfind_process(Citro2D)
 
-try_add_imported_target(Citro2D m 3ds::ctrulib 3ds::Citro3D)
+try_add_imported_target(Citro2D m 3ds::ctrulib 3ds::citro3d)

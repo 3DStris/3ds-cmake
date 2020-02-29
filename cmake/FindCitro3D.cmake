@@ -5,7 +5,7 @@
 #  Citro3D_INCLUDE_DIRS - The Citro3D include directories
 #  Citro3D_LIBRARIES - The libraries needed to use Citro3D
 # Unless we are unable to find ctrulib
-# It also adds an imported target named `3ds::Citro3D`, Linking against it is
+# It also adds an imported target named `3ds::citro3d`, Linking against it is
 # equivalent to:
 # target_link_libraries(mytarget ${Citro3D_LIBRARIES})
 # target_include_directories(mytarget PRIVATE ${Citro3D_INCLUDE_DIRS})
