@@ -281,7 +281,7 @@ endif()
 
 
 function(__add_smdh target APP_TITLE APP_DESCRIPTION APP_AUTHOR APP_ICON)
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen)
+	file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen)
 
 	if(BANNERTOOL AND NOT FORCE_SMDHTOOL)
 		set(__SMDH_COMMAND ${BANNERTOOL} makesmdh -s ${APP_TITLE} -l ${APP_DESCRIPTION}  -p ${APP_AUTHOR} -i ${APP_ICON} -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target})
@@ -323,7 +323,7 @@ function(add_3dsx_target target)
 endfunction()
 
 function(__add_ncch_banner target IMAGE SOUND)
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen)
+	file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen)
 
 	if(IMAGE MATCHES ".*\\.png$")
 		set(IMG_PARAM -i ${IMAGE})
