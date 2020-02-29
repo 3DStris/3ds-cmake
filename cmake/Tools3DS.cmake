@@ -100,7 +100,7 @@
 #
 # This is the same as:
 # generate_shbins(source/shader.vertex.pica)
-# add_binary_library(target ${CMAKE_CURRENT_BINARY_DIR}/shaders/shader.vertex.shbin)
+# add_binary_library(target ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders/shader.vertex.shbin)
 #
 # This is the function to be used to reproduce devkitArm makefiles behaviour.
 # For example, add_shbin_library(shaders data/my1stshader.vsh.pica) will generate
@@ -282,11 +282,11 @@ endif()
 
 function(__add_smdh target APP_TITLE APP_DESCRIPTION APP_AUTHOR APP_ICON)
 	if(BANNERTOOL AND NOT FORCE_SMDHTOOL)
-		set(__SMDH_COMMAND ${BANNERTOOL} makesmdh -s ${APP_TITLE} -l ${APP_DESCRIPTION}  -p ${APP_AUTHOR} -i ${APP_ICON} -o ${CMAKE_CURRENT_BINARY_DIR}/${target})
+		set(__SMDH_COMMAND ${BANNERTOOL} makesmdh -s ${APP_TITLE} -l ${APP_DESCRIPTION}  -p ${APP_AUTHOR} -i ${APP_ICON} -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target})
 	else()
-		set(__SMDH_COMMAND ${SMDHTOOL} --create ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON} ${CMAKE_CURRENT_BINARY_DIR}/${target})
+		set(__SMDH_COMMAND ${SMDHTOOL} --create ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target})
 	endif()
-	add_custom_command( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}
+	add_custom_command( OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target}
 						COMMAND ${__SMDH_COMMAND}
 						WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 						DEPENDS ${APP_ICON}
@@ -309,14 +309,14 @@ function(add_3dsx_target target)
 			__add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 		endif()
 
-		add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.3dsx
-						   COMMAND ${_3DSXTOOL} $<TARGET_FILE:${target}> ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.3dsx --smdh=${CMAKE_CURRENT_BINARY_DIR}/${target_we}.smdh --romfs=${APP_ROMFS}
-						   DEPENDS ${target} ${ROMFS_FILES} ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.smdh
+		add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.3dsx
+						   COMMAND ${_3DSXTOOL} $<TARGET_FILE:${target}> ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.3dsx --smdh=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.smdh --romfs=${APP_ROMFS}
+						   DEPENDS ${target} ${ROMFS_FILES} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.smdh
 						   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 						   VERBATIM
 		)
 	endif()
-	add_custom_target(${target_we}_3dsx ALL SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.3dsx)
+	add_custom_target(${target_we}_3dsx ALL SOURCES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.3dsx)
 	set_target_properties(${target} PROPERTIES LINK_FLAGS "-specs=3dsx.specs")
 endfunction()
 
@@ -331,8 +331,8 @@ function(__add_ncch_banner target IMAGE SOUND)
 	else()
 		set(SND_PARAM -ca ${SOUND})
 	endif()
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target}
-						COMMAND ${BANNERTOOL} makebanner -o ${CMAKE_CURRENT_BINARY_DIR}/${target} ${IMG_PARAM} ${SND_PARAM}
+	add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target}
+						COMMAND ${BANNERTOOL} makebanner -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target} ${IMG_PARAM} ${SND_PARAM}
 						WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 						DEPENDS ${IMAGE} ${SOUND}
 						VERBATIM
@@ -366,30 +366,30 @@ function(add_cia_target target RSF IMAGE SOUND ROMFS)
 		elseif(CTRULIB)
 			set(APP_ICON ${CTRULIB}/default_icon.png)
 		else()
-			message(FATAL_ERROR "No icon found ! Please use NO_SMDH or provide some icon.")
+			message(FATAL_ERROR "No icon found! Please use NO_SMDH or provide some icon.")
 		endif()
 	endif()
-	file(GLOB_RECURSE ROMFS_FILES "${ROMFS}/*.*")
+	file(GLOB_RECURSE ROMFS_FILES CONFIGURE_DEPENDS "${ROMFS}/*.*")
 	if(NOT ${target_we}.smdh)
 		__add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 	endif()
 	__add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cia
+	add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
 						COMMAND ${STRIP} -o $<TARGET_FILE:${target}>-stripped $<TARGET_FILE:${target}>
 						COMMAND ${MAKEROM}  -f cia
 											-target t
 											-exefslogo
-											-o ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cia
+											-o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia
 											-elf $<TARGET_FILE:${target}>-stripped
 											-rsf ${RSF}
-											-banner ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.bnr
-											-icon ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.smdh
-						DEPENDS ${target} ${ROMFS_FILES} ${RSF} ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.bnr ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.smdh
+											-banner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.bnr
+											-icon ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.smdh
+						DEPENDS ${target} ${ROMFS_FILES} ${RSF} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.bnr ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.smdh
 						WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 						VERBATIM
 	)
 
-	add_custom_target(${target_we}_cia ALL SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cia)
+	add_custom_target(${target_we}_cia ALL SOURCES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cia)
 	set_target_properties(${target} PROPERTIES LINK_FLAGS "-specs=3dsx.specs")
 endfunction()
 
@@ -420,29 +420,29 @@ function(add_cci_target target RSF IMAGE SOUND )
 		elseif(CTRULIB)
 			set(APP_ICON ${CTRULIB}/default_icon.png)
 		else()
-			message(FATAL_ERROR "No icon found ! Please use NO_SMDH or provide some icon.")
+			message(FATAL_ERROR "No icon found! Please use NO_SMDH or provide some icon.")
 		endif()
 	endif()
-	if( NOT ${target_we}.smdh)
+	if(NOT ${target_we}.smdh)
 		__add_smdh(${target_we}.smdh ${APP_TITLE} ${APP_DESCRIPTION} ${APP_AUTHOR} ${APP_ICON})
 	endif()
 	__add_ncch_banner(${target_we}.bnr ${IMAGE} ${SOUND})
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cci
+	add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cci
 						COMMAND ${STRIP} -o $<TARGET_FILE:${target}>-stripped $<TARGET_FILE:${target}>
 						COMMAND ${MAKEROM}  -f cci
 											-target t
 											-exefslogo
-											-o ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cci
+											-o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cci
 											-elf $<TARGET_FILE:${target}>-stripped
 											-rsf ${RSF}
-											-banner ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.bnr
-											-icon ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.smdh
-						DEPENDS ${target} ${RSF} ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.bnr ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.smdh
+											-banner ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.bnr
+											-icon ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.smdh
+						DEPENDS ${target} ${RSF} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.bnr ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target_we}.smdh
 						WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 						VERBATIM
 	)
 
-	add_custom_target(${target_we}_cci ALL SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${target_we}.cci)
+	add_custom_target(${target_we}_cci ALL SOURCES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target_we}.cci)
 	set_target_properties(${target} PROPERTIES LINK_FLAGS "-specs=3dsx.specs")
 endfunction()
 
@@ -455,7 +455,7 @@ macro(add_netload_target name target)
 		message("NOT ${target}")
 		set(FILE ${target})
 	else()
-		set(FILE ${CMAKE_CURRENT_BINARY_DIR}/${target}.3dsx)
+		set(FILE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${target}.3dsx)
 	endif()
 	add_custom_target(${name}
 					COMMAND ${_3DSLINK} ${FILE} ${__NETLOAD_IP_OPTION}
@@ -484,19 +484,19 @@ macro(add_binary_library libtarget)
 		string(REGEX REPLACE "^([0-9])" "_\\1" __BIN_FILE_NAME ${__BIN_FILE_NAME}) # add '_' if the file name starts by a number
 
 		#Generate the header file
-		configure_file(${__tools3dsdir}/bin2s_header.h.in ${CMAKE_CURRENT_BINARY_DIR}/${libtarget}_include/${__BIN_FILE_NAME}.h)
+		configure_file(${__tools3dsdir}/bin2s_header.h.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${libtarget}_include/${__BIN_FILE_NAME}.h)
 	endforeach()
 
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/binaries_asm)
+	file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/binaries_asm)
 	# Generate the assembly file, and create the new target
-	add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/binaries_asm/${libtarget}.s
-						COMMAND ${BIN2S} ${ARGN} > ${CMAKE_CURRENT_BINARY_DIR}/binaries_asm/${libtarget}.s
+	add_custom_command(OUTPUT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/binaries_asm/${libtarget}.s
+						COMMAND ${BIN2S} ${ARGN} > ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/binaries_asm/${libtarget}.s
 						DEPENDS ${ARGN}
 						WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 	)
 
-	add_library(${libtarget} ${CMAKE_CURRENT_BINARY_DIR}/binaries_asm/${libtarget}.s)
-	target_include_directories(${libtarget} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/${libtarget}_include)
+	add_library(${libtarget} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/binaries_asm/${libtarget}.s)
+	target_include_directories(${libtarget} INTERFACE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${libtarget}_include)
 endmacro()
 
 macro(target_embed_file _target)
@@ -562,34 +562,34 @@ macro(get_filename_wse VAR FileName)
 endmacro()
 
 function(generate_shbins)
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+	file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
 	foreach(__shader_file ${ARGN})
 		get_filename_wse(__shader_file_we "${__shader_file}")
 		#Generate the shbin file
-		add_shbin(${CMAKE_CURRENT_BINARY_DIR}/shaders/${__shader_file_we}.shbin ${__shader_file})
+		add_shbin(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders/${__shader_file_we}.shbin ${__shader_file})
 	endforeach()
 endfunction()
 
 function(add_shbin_library libtarget)
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+	file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders)
 	set(__SHADERS_BIN_FILES)
 	foreach(__shader_file ${ARGN})
 		get_filename_wse(__shader_file_we "${__shader_file}")
 		#Generate the shbin file
-		list(APPEND __SHADERS_BIN_FILES ${CMAKE_CURRENT_BINARY_DIR}/shaders/${__shader_file_we}.shbin)
-		add_shbin(${CMAKE_CURRENT_BINARY_DIR}/shaders/${__shader_file_we}.shbin ${__shader_file})
+		list(APPEND __SHADERS_BIN_FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders/${__shader_file_we}.shbin)
+		add_shbin(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/shaders/${__shader_file_we}.shbin ${__shader_file})
 	endforeach()
 	add_binary_library(${libtarget} ${__SHADERS_BIN_FILES})
 endfunction()
 
-macro(add_t3s libtarget)
-	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gfx/include/${libtarget})
-	file(MAKE_DIRECTORY ${PROJECT_SOURCE_DIR}/romfs/gfx/)
+macro(add_t3s libtarget ROMFS)
+	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/gfx/include/${libtarget})
+	file(MAKE_DIRECTORY ${ROMFS}/gfx)
 
 	foreach(__gfx_file ${ARGN})
 		get_filename_wse(__gfx_file_we "${__gfx_file}")
-		__add_t3s(${libtarget} ${PROJECT_SOURCE_DIR}/romfs/gfx/${__gfx_file_we}.t3x ${CMAKE_CURRENT_BINARY_DIR}/gfx/${__gfx_file_we}.d ${CMAKE_CURRENT_BINARY_DIR}/gfx/include/${libtarget}/${__gfx_file_we}.h ${__gfx_file})
-		target_include_directories(${libtarget} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gfx/include)
+		__add_t3s(${libtarget} ${ROMFS}/gfx/${__gfx_file_we}.t3x ${CMAKE_BINARY_DIR}/gfx/${__gfx_file_we}.d ${CMAKE_BINARY_DIR}/gfx/include/${libtarget}/${__gfx_file_we}.h ${__gfx_file})
+		target_include_directories(${libtarget} PUBLIC ${CMAKE_BINARY_DIR}/gfx/include)
 	endforeach()
 endmacro()
 
