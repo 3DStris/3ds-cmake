@@ -1,14 +1,14 @@
-# - Try to find citro2d
-# You can set CITRO2D_ROOT to specify a certain directory to look in first.
+# - Try to find Citro2D
+# You can set Citro2D_ROOT to specify a certain directory to look in first.
 # Once done this will define
-#  CITRO2D_FOUND - System has citro2d
-#  CITRO2D_INCLUDE_DIRS - The citro2d include directories
-#  CITRO2D_LIBRARIES - The libraries needed to use citro2d
-# Unless we are unable to find CTRULIB
-# It also adds an imported target named `3ds::citro2d`, Linking against it is
+#  Citro2D_FOUND - System has Citro2D
+#  Citro2D_INCLUDE_DIRS - The Citro2D include directories
+#  Citro2D_LIBRARIES - The libraries needed to use Citro2D
+# Unless we are unable to find ctrulib
+# It also adds an imported target named `3ds::Citro2D`, Linking against it is
 # equivalent to:
-# target_link_libraries(mytarget ${CITRO2D_LIBRARIES})
-# target_include_directories(mytarget PRIVATE ${CITRO2D_INCLUDE_DIRS})
+# target_link_libraries(mytarget ${Citro2D_LIBRARIES})
+# target_include_directories(mytarget PRIVATE ${Citro2D_INCLUDE_DIRS})
 
 if(NOT 3DS)
     message(FATAL_ERROR "This module can only be used if you are using the 3DS toolchain file. Please erase this build directory or create another one, and then use -DCMAKE_TOOLCHAIN_FILE=DevkitArm3DS.cmake when calling cmake for the 1st time. For more information, see the Readme.md for more information.")
@@ -17,33 +17,33 @@ endif()
 include(LibFindMacros)
 include(try_add_imported_target)
 
-# citro2d requires ctrulib
-libfind_package(CITRO2D CTRULIB)
-libfind_package(CITRO2D CITRO3D)
+# Citro2D requires ctrulib
+libfind_package(Citro2D ctrulib)
+libfind_package(Citro2D Citro3D)
 
-set(_CITRO2D_SEARCHES)
+set(_Citro2D_SEARCHES)
 
-# Search CITRO2D_ROOT first if it is set.
-if(CITRO2D_ROOT)
-  set(_CITRO2D_SEARCH_ROOT
-    PATHS ${CITRO2D_ROOT}
+# Search Citro2D_ROOT first if it is set.
+if(Citro2D_ROOT)
+  set(_Citro2D_SEARCH_ROOT
+    PATHS ${Citro2D_ROOT}
     NO_DEFAULT_PATH
     NO_CMAKE_FIND_ROOT_PATH)
-  list(APPEND _CITRO2D_SEARCHES _CITRO2D_SEARCH_ROOT)
+  list(APPEND _Citro2D_SEARCHES _Citro2D_SEARCH_ROOT)
 endif()
 
 # Search below ${DEVKITPRO}, ${DEVKITARM} etc.
-set(_CITRO2D_SEARCH_NORMAL
+set(_Citro2D_SEARCH_NORMAL
   PATHS / /citro2d /libctru /ctrulib /citro3d
   NO_DEFAULT_PATH
   ONLY_CMAKE_FIND_ROOT_PATH)
-list(APPEND _CITRO2D_SEARCHES _CITRO2D_SEARCH_NORMAL)
+list(APPEND _Citro2D_SEARCHES _Citro2D_SEARCH_NORMAL)
 
-foreach(search ${_CITRO2D_SEARCHES})
-  find_path(CITRO2D_INCLUDE_DIR NAMES citro2d.h
+foreach(search ${_Citro2D_SEARCHES})
+  find_path(Citro2D_INCLUDE_DIR NAMES citro2d.h
     ${${search}}
     PATH_SUFFIXES include)
-  find_library(CITRO2D_LIBRARY NAMES citro2d libcitro2d.a
+  find_library(Citro2D_LIBRARY NAMES citro2d libcitro2d.a
     ${${search}}
     PATH_SUFFIXES lib)
 endforeach()
@@ -54,9 +54,9 @@ endforeach()
 
 set(LIBM_LIBRARY m)
 
-set(CITRO2D_PROCESS_INCLUDES CITRO2D_INCLUDE_DIR)
-set(CITRO2D_PROCESS_LIBS CITRO2D_LIBRARY LIBM_LIBRARY)
+set(Citro2D_PROCESS_INCLUDES Citro2D_INCLUDE_DIR)
+set(Citro2D_PROCESS_LIBS Citro2D_LIBRARY LIBM_LIBRARY)
 
-libfind_process(CITRO2D)
+libfind_process(Citro2D)
 
-try_add_imported_target(CITRO2D m 3ds::ctrulib 3ds::citro3d)
+try_add_imported_target(Citro2D m 3ds::ctrulib 3ds::Citro3D)
