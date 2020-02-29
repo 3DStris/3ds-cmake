@@ -281,6 +281,8 @@ endif()
 
 
 function(__add_smdh target APP_TITLE APP_DESCRIPTION APP_AUTHOR APP_ICON)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen)
+
 	if(BANNERTOOL AND NOT FORCE_SMDHTOOL)
 		set(__SMDH_COMMAND ${BANNERTOOL} makesmdh -s ${APP_TITLE} -l ${APP_DESCRIPTION}  -p ${APP_AUTHOR} -i ${APP_ICON} -o ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/gen/${target})
 	else()
@@ -321,6 +323,8 @@ function(add_3dsx_target target)
 endfunction()
 
 function(__add_ncch_banner target IMAGE SOUND)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen)
+
 	if(IMAGE MATCHES ".*\\.png$")
 		set(IMG_PARAM -i ${IMAGE})
 	else()
@@ -583,13 +587,13 @@ function(add_shbin_library libtarget)
 endfunction()
 
 macro(add_t3s libtarget ROMFS)
-	file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/gfx/include/${libtarget})
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gfx/include/${libtarget})
 	file(MAKE_DIRECTORY ${ROMFS}/gfx)
 
 	foreach(__gfx_file ${ARGN})
 		get_filename_wse(__gfx_file_we "${__gfx_file}")
-		__add_t3s(${libtarget} ${ROMFS}/gfx/${__gfx_file_we}.t3x ${CMAKE_BINARY_DIR}/gfx/${__gfx_file_we}.d ${CMAKE_BINARY_DIR}/gfx/include/${libtarget}/${__gfx_file_we}.h ${__gfx_file})
-		target_include_directories(${libtarget} PUBLIC ${CMAKE_BINARY_DIR}/gfx/include)
+		__add_t3s(${libtarget} ${ROMFS}/gfx/${__gfx_file_we}.t3x ${CMAKE_CURRENT_BINARY_DIR}/gfx/${__gfx_file_we}.d ${CMAKE_CURRENT_BINARY_DIR}/gfx/include/${libtarget}/${__gfx_file_we}.h ${__gfx_file})
+		target_include_directories(${libtarget} PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/gfx/include)
 	endforeach()
 endmacro()
 
