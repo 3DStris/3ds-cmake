@@ -1,4 +1,4 @@
-# 3ds-cmake (3DSTris)
+# 3ds-cmake (3DStris)
 
 CMake scripts for devkitArm and 3DS homebrew development.
 
